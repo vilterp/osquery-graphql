@@ -65,6 +65,40 @@ const socketType = new GraphQLObjectType({
   })
 });
 
+const listeningPortType = new GraphQLObjectType({
+  name: 'ListeningPort',
+  description: "Processes with listening (bound) network sockets/ports.",
+  fields: () => ({
+    pid: {
+      type: GraphQLInt,
+      description: "Process (or thread) ID"
+    },
+    process: {
+      type: processType,
+      resolve: (port) => {
+        // wtf
+        return osquery(`select * from processes where pid = ${port.pid}`).then(first);
+      }
+    },
+    port: {
+      type: GraphQLInt,
+      description: "Transport layer port"
+    },
+    protocol: {
+      type: GraphQLInt,
+      description: "Transport protocol (TCP/UDP)"
+    },
+    family: {
+      type: GraphQLInt,
+      description: "Network protocol (IPv4, IPv6)"
+    },
+    address: {
+      type: GraphQLString,
+      description: "Specific address for bind"
+    },
+  })
+});
+
 const processType = new GraphQLObjectType({
   name: 'Process',
   fields: () => ({
@@ -166,6 +200,13 @@ const processType = new GraphQLObjectType({
       resolve: (process) => (
         osquery(`select * from process_open_sockets where pid = ${process.pid}`)
       )
+    },
+    listening_ports: {
+      name: 'listening_ports',
+      type: new GraphQLList(listeningPortType),
+      resolve: (process) => (
+        osquery(`select * from listening_ports where pid = ${process.pid}`)
+      )
     }
   })
 });
@@ -175,12 +216,39 @@ export default new GraphQLSchema({
   query: new GraphQLObjectType({
     name: 'RootQueryType',
     fields: {
+      // TODO: specific process
       processes: {
         type: new GraphQLList(processType),
-        resolve() {
-          return osquery('select * from processes');
-        }
+        resolve: () => osquery('select * from processes')
+      },
+      process: {
+        type: processType,
+        args: {
+          pid: {
+            type: GraphQLInt
+          }
+        },
+        resolve: (req, { pid }) => osquery(`select * from processes where pid = ${pid}`).then(first)
+      },
+      listening_ports: {
+        type: new GraphQLList(listeningPortType),
+        resolve: () => osquery('select * from listening_ports')
+      },
+      listening_port: {
+        type: listeningPortType,
+        args: {
+          port: {
+            type: GraphQLInt
+          }
+        },
+        resolve: (req, { port }) =>
+          osquery(`select * from listening_ports where port = ${port}`).then(first)
       }
     }
   })
 });
+
+
+function first(res) {
+  return res[0];
+}

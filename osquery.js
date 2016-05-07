@@ -5,6 +5,7 @@ export default function osquery(query) {
   return new Promise(function(resolve, reject) {
     var buffer = '';
     var osqueryProcess = spawn('/usr/local/bin/osqueryi', [query, '--json']);
+    console.log(query);
     osqueryProcess.stdout.on('data', function(chunk) {
       buffer += chunk;
     });
