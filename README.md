@@ -5,15 +5,33 @@ Explore what's going on in your system with the power of [GraphQL](http://graphq
 E.g. to see what process is listening on a port and what files it has open:
 
 ```
-{
-  listening_port(port: 8082) {
-    process {
-      pid
-      cmdline
-      open_files {
-        path
-      }
+listening_port(port: 8082) {
+  process {
+    pid
+    cmdline
+    open_files {
+      path
     }
+  }
+}
+```
+
+What port a process is listening on:
+
+```
+processes(cmdline: "node myapp.js") {
+  listening_ports {
+    port
+  }
+}
+```
+
+Which processes have a file open: (bug: not all file attributes are currently returned)
+
+```
+file(path: '/foo.txt') {
+  opened_by_processes {
+    pid
   }
 }
 ```
