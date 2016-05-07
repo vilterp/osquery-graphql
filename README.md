@@ -1,6 +1,6 @@
 # osquery-graphql
 
-Explore what's going on in your system with the power of [GraphQL](http://graphql.org/), powered by [OSQuery](http://osquery.io/).
+Explore what's going on in your system with the power of [GraphQL](http://graphql.org/), powered by [OSQuery](http://osquery.io/). It's great if, like me, you can never remember the names or arguments of all those Unix utilities like [`netstat`, `lsof`, or `fuser`](http://www.cyberciti.biz/faq/what-process-has-open-linux-port/)...
 
 E.g.
 
