@@ -662,5 +662,27 @@ export default [
       {"name": "strings", "type": "TEXT_TYPE", "description": "Matching strings"}
       {"name": "tags", "type": "TEXT_TYPE", "description": "Matching tags"}
     ]
+  },
+  {
+    "name": "file",
+    "description": "Interactive filesystem attributes and metadata.",
+    "columns": [
+      {"name": "path", "type": "TEXT_TYPE", "description": "Absolute file path"},
+      {"name": "directory", "type": "TEXT_TYPE", "description": "Directory of file(s)"},
+      {"name": "filename", "type": "TEXT_TYPE", "description": "Name portion of file path"},
+      {"name": "inode", "type": "BIGINT_TYPE", "description": "Filesystem inode number"},
+      {"name": "uid", "type": "BIGINT_TYPE", "description": "Owning user ID"},
+      {"name": "gid", "type": "BIGINT_TYPE", "description": "Owning group ID"},
+      {"name": "mode", "type": "TEXT_TYPE", "description": "Permission bits"},
+      {"name": "device", "type": "BIGINT_TYPE", "description": "Device ID (optional)"},
+      {"name": "size", "type": "BIGINT_TYPE", "description": "Size of file in bytes"},
+      {"name": "block_size", "type": "INTEGER_TYPE", "description": " Block size of filesystem"},
+      {"name": "atime", "type": "BIGINT_TYPE", "description": "Last access time"},
+      {"name": "mtime", "type": "BIGINT_TYPE", "description": "Last modification time"},
+      {"name": "ctime", "type": "BIGINT_TYPE", "description": "Last status change time"},
+      {"name": "btime", "type": "BIGINT_TYPE", "description": "(B)irth or (cr)eate time"},
+      {"name": "hard_links", "type": "INTEGER_TYPE", "description": "Number of hard links"},
+      {"name": "type", "type": "TEXT_TYPE", "description": "File status"}
+    ]
   }
 ];

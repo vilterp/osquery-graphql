@@ -207,9 +207,126 @@ const processType = new GraphQLObjectType({
       resolve: (process) => (
         osquery(`select * from listening_ports where pid = ${process.pid}`)
       )
+    },
+    open_files: {
+      name: 'open_files',
+      type: new GraphQLList(fileType),
+      resolve: (process) => (
+        osquery(`select * from process_open_files where pid = ${process.pid} limit 2`).then(
+          (open_files) => Promise.all(open_files.map(
+            (open_file) => osquery(`select * from file where path = '${open_file.path}'`).then(first)
+          ))
+        )
+      )
+    },
+    executable: {
+      name: 'executable',
+      type: fileType,
+      resolve: (process) => (
+        osquery(`select * from file where path = '${process.path}'`).then(first)
+      )
     }
   })
 });
+
+const fileType = new GraphQLObjectType({
+  name: "file",
+  description: "Interactive filesystem attributes and metadata.",
+  fields: () => ({
+    path: {
+      type: GraphQLString,
+      description: "Absolute file path"
+    },
+    directory: {
+      type: GraphQLString,
+      description: "Directory of file(s)"
+    },
+    filename: {
+      type: GraphQLString,
+      description: "Name portion of file path"
+    },
+    inode: {
+      type: GraphQLInt,
+      description: "Filesystem inode number"
+    },
+    uid: {
+      type: GraphQLInt,
+      description: "Owning user ID"
+    },
+    gid: {
+      type: GraphQLInt,
+      description: "Owning group ID"
+    },
+    mode: {
+      type: GraphQLString,
+      description: "Permission bits"
+    },
+    device: {
+      type: GraphQLInt,
+      description: "Device ID (optional)"
+    },
+    size: {
+      type: GraphQLInt,
+      description: "Size of file in bytes"
+    },
+    block_size: {
+      type: GraphQLInt,
+      description: " Block size of filesystem"
+    },
+    atime: {
+      type: GraphQLInt,
+      description: "Last access time"
+    },
+    mtime: {
+      type: GraphQLInt,
+      description: "Last modification time"
+    },
+    ctime: {
+      type: GraphQLInt,
+      description: "Last status change time"
+    },
+    btime: {
+      type: GraphQLInt,
+      description: "(B)irth or (cr)eate time"
+    },
+    hard_links: {
+      type: GraphQLInt,
+      description: "Number of hard links"
+    },
+    type: {
+      type: GraphQLString,
+      description: "File status"
+    },
+    process_instances: {
+      type: new GraphQLList(processType),
+      description: "instances of this file running as a process. opposite: `executable`",
+      resolve: (file) => osquery(`select * from processes where path = '${file.path}'`)
+    },
+    opened_by_processes: {
+      type: new GraphQLList(openFileType),
+      description: "processes which have this file open",
+      resolve: (file) => osquery(`select * from process_open_files where path = '${file.path}'`)
+    }
+  })
+});
+
+const openFileType = new GraphQLObjectType({
+  name: 'OpenFile',
+  fields: () => ({
+    fd: {
+      type: GraphQLInt,
+      description: 'file descriptor'
+    },
+    process: {
+      type: processType,
+      resolve: (openFile) => osquery(`select * from processes where pid = ${openFile.pid}`)
+    },
+    file: {
+      type: fileType,
+      resolve: (openFile) => osquery(`select * from files where path = '${openFile.path}'`)
+    }
+  })
+})
 
 
 export default new GraphQLSchema({
@@ -243,6 +360,15 @@ export default new GraphQLSchema({
         },
         resolve: (req, { port }) =>
           osquery(`select * from listening_ports where port = ${port}`).then(first)
+      },
+      file: {
+        type: fileType,
+        args: {
+          path: {
+            type: GraphQLString
+          }
+        },
+        resolve: (req, { path }) => osquery(`select * from file where path = '${path}'`).then(first)
       }
     }
   })
