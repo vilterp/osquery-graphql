@@ -336,7 +336,20 @@ export default new GraphQLSchema({
       // TODO: specific process
       processes: {
         type: new GraphQLList(processType),
-        resolve: () => osquery('select * from processes')
+        // should really be any field....
+        args: {
+          cmdline: {
+            type: GraphQLString
+          }
+        },
+        resolve: (req, { cmdline }) => {
+          if(cmdline) {
+            // problem: always returns this osquery call
+            return osquery(`select * from processes where cmdline like '%${cmdline}%'`)
+          } else {
+            return osquery(`select * from processes`)
+          }
+        }
       },
       process: {
         type: processType,
