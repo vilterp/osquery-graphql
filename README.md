@@ -44,7 +44,7 @@ npm install
 npm run start
 ```
 
-& navigate to [http://localhost:3100/qraphql](http://localhost:3100/) for the GraphiQL console, which lets you explore the schema and try out queries.
+& navigate to [http://localhost:3100/qraphql](http://localhost:3100/qraphql) for the GraphiQL console, which lets you explore the schema and try out queries.
 
 ## Project status
 
